@@ -9,6 +9,7 @@ Install the Adafruit MQTT-for-esp8266/esp32 and thermal printer libaries.
 
 Populate secrets.h:
 
+```
 const char* ssid = "yes";
 const char* password = "yes";
 
@@ -17,3 +18,4 @@ const char* password = "yes";
 #define MQTT_USER "yes"
 #define MQTT_PASS "yes"
 #define MQTT_TOPIC_PREFIX "yes"
+```
