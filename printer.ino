@@ -9,14 +9,18 @@
 
 #define TX_PIN 26
 #define RX_PIN 36
+#define BTN_PIN 39
 
 WiFiClient client;
 Adafruit_MQTT_Client mqtt(&client, MQTT_HOST, MQTT_PORT, MQTT_USER, MQTT_PASS);
 Adafruit_MQTT_Publish boot = Adafruit_MQTT_Publish(&mqtt, MQTT_TOPIC_PREFIX "/receipt_printer/boot");
+Adafruit_MQTT_Publish button = Adafruit_MQTT_Publish(&mqtt, MQTT_TOPIC_PREFIX "/receipt_printer/button");
 Adafruit_MQTT_Subscribe print_text = Adafruit_MQTT_Subscribe(&mqtt, MQTT_TOPIC_PREFIX "/receipt_printer/print_text");
 
 SoftwareSerial mySerial(RX_PIN, TX_PIN);
 Adafruit_Thermal printer(&mySerial);
+
+bool btn_debounce;
 
 void connectWifi() {
 
@@ -31,6 +35,8 @@ void connectWifi() {
 }
 
 void setup() {
+  pinMode(BTN_PIN, INPUT_PULLUP);
+
   Serial.begin(115200);
   connectWifi();
   mqtt.subscribe(&print_text);
@@ -44,6 +50,8 @@ void setup() {
   printer.println("Booted.");
   printer.feed(2);
 
+  btn_debounce = true;
+
   // printer.sleep();
   // delay(3000L);
   // printer.wake();
@@ -53,10 +61,18 @@ void setup() {
 void loop() {
   MQTT_connect();
   Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(5000))) {
+  while ((subscription = mqtt.readSubscription(50))) {
     if (subscription == &print_text) {
       printer.println((char *)print_text.lastread);
     }
+  }
+  if ((digitalRead(BTN_PIN) == LOW) && btn_debounce) {
+    Serial.println("Button pressed");
+    button.publish(1);
+    btn_debounce = false;
+  }
+  if (digitalRead(BTN_PIN) == HIGH) {
+    btn_debounce = true;
   }
 }
 
