@@ -2,6 +2,9 @@
 
 This listens on MQTT and publishes the result to a thermal printer. It's made to run on an ESP32-based M5Stick-C connected to a QR203 thermal recept printer.
 
+Printer: https://www.aliexpress.com/item/4000056221011.html
+Paper: https://www.aliexpress.com/item/1005002402312945.html
+
 # How?
 Use the arduino IDE.
 Install the latest ESP32 arduino board library.
