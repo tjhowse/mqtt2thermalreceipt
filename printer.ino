@@ -80,7 +80,8 @@ void wake_printer_if_required() {
 }
 
 void sleep_printer_if_required() {
-  if ((millis() > printer_sleepy_time) && !printer_asleep) {
+  // if ((millis() > printer_sleepy_time) && !printer_asleep) {
+  if (!printer_asleep) {
     printer.sleep();
     Serial.println("Putting printer to sleep.");
     printer_asleep = true;
@@ -88,17 +89,22 @@ void sleep_printer_if_required() {
 }
 
 void schedule_printer_sleepytime() {
+  // Currently unused
+  return;
   printer_sleepy_time = millis() + PRINTER_SLEEP_TIMEOUT_S * 1000;
-    Serial.println("Scheduling sleepytime");
+  Serial.println("Scheduling sleepytime");
 }
 
 void loop() {
   MQTT_connect();
   Adafruit_MQTT_Subscribe *subscription;
-  while ((subscription = mqtt.readSubscription(50))) {
+  while ((subscription = mqtt.readSubscription(100))) {
+    // This loops until there are no more subscription notifications
+    // pending from the broker.
     if (subscription == &print_text) {
       wake_printer_if_required();
       printer.println((char *)print_text.lastread);
+      Serial.println((char *)print_text.lastread);
       schedule_printer_sleepytime();
     }
   }
